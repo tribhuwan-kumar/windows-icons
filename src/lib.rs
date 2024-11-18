@@ -11,11 +11,10 @@ mod utils {
 }
 mod uwp_apps;
 
-pub fn get_icon_by_process_id(process_id: u32) -> RgbaImage {
+pub async fn get_icon_by_process_id(process_id: u32) -> RgbaImage {
     let path = get_process_path(process_id).expect("Failed to get process path");
-    println!("Path: {}", path);
     if path.contains("WindowsApps") {
-        return get_uwp_icon(&path).expect("Failed to get UWP icon");
+        return get_uwp_icon(&path).await.expect("Failed to get UWP icon");
     } else {
         return get_icon_by_path(&path);
     }
@@ -28,14 +27,14 @@ pub fn get_icon_by_path(path: &str) -> RgbaImage {
     }
 }
 
-pub fn get_icon_base64_by_process_id(process_id: u32) -> String {
+pub async  fn get_icon_base64_by_process_id(process_id: u32) -> String {
     let path = get_process_path(process_id).expect("Failed to get process path");
-    get_icon_base64_by_path(&path)
+    get_icon_base64_by_path(&path).await
 }
 
-pub fn get_icon_base64_by_path(path: &str) -> String {
+pub async fn get_icon_base64_by_path(path: &str) -> String {
     if path.contains("WindowsApps") {
-        return get_uwp_icon_base64(path).expect("Failed to get UWP icon base64");
+        return get_uwp_icon_base64(path).await.expect("Failed to get UWP icon base64");
     }
     let icon_image = get_icon_by_path(path);
     let mut buffer = Vec::new();
