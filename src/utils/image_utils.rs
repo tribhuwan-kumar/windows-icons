@@ -26,12 +26,17 @@ use windows::{
     },
 };
 
-pub unsafe fn icon_to_image(icon: HICON) -> RgbaImage {
+pub unsafe fn icon_to_image(icon: HICON) -> Result<RgbaImage, Box<dyn Error>> {
     let bitmap_size_i32 = i32::try_from(mem::size_of::<BITMAP>()).unwrap();
     let biheader_size_u32 = u32::try_from(mem::size_of::<BITMAPINFOHEADER>()).unwrap();
 
     let mut info = MaybeUninit::uninit();
-    GetIconInfo(icon, info.as_mut_ptr()).unwrap();
+    if GetIconInfo(icon, info.as_mut_ptr()).is_err() {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Failed to get icon info",
+        )));
+    }
     let info = info.assume_init();
     DeleteObject(info.hbmMask).unwrap();
 
@@ -86,13 +91,13 @@ pub unsafe fn icon_to_image(icon: HICON) -> RgbaImage {
     assert!(result == 1);
     DeleteObject(info.hbmColor).unwrap();
 
-    RgbaImage::from_fn(width_u32, height_u32, |x, y| {
+    Ok(RgbaImage::from_fn(width_u32, height_u32, |x, y| {
         let x_usize = usize::try_from(x).unwrap();
         let y_usize = usize::try_from(y).unwrap();
         let idx = y_usize * width_usize + x_usize;
         let [b, g, r, a] = buf[idx].to_le_bytes();
         [r, g, b, a].into()
-    })
+    }))
 }
 
 pub unsafe fn get_hicon(file_path: &str) -> HICON {
