@@ -24,7 +24,7 @@ Here are some examples of how to use the Windows Icons library:
 
 ```rust
 // Get icon as an image from a file path
-let icon = get_icon_image_by_path("C:\\Windows\\System32\\notepad.exe");
+let icon = get_icon_by_path("C:\\Windows\\System32\\notepad.exe");
 icon.save("notepad.png").unwrap();
 
 // Get icon as a base64 string from a file path
