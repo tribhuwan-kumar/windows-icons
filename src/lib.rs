@@ -25,8 +25,10 @@ pub async fn get_icon_by_process_id(process_id: u32) -> Result<RgbaImage, Box<dy
 
 pub fn get_icon_by_path(path: &str) -> Result<RgbaImage, Box<dyn Error>> {
     unsafe {
-        let icon = get_hicon(path);
-        icon_to_image(icon)
+        match get_hicon(path) {
+            Ok(icon) => icon_to_image(icon),
+            Err(e) => Err(e),
+        }
     }
 }
 

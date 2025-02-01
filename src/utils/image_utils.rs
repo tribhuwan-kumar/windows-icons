@@ -100,7 +100,7 @@ pub unsafe fn icon_to_image(icon: HICON) -> Result<RgbaImage, Box<dyn Error>> {
     }))
 }
 
-pub unsafe fn get_hicon(file_path: &str) -> HICON {
+pub unsafe fn get_hicon(file_path: &str) -> Result<HICON, Box<dyn std::error::Error>> {
     let wide_path: Vec<u16> = OsStr::new(file_path).encode_wide().chain(Some(0)).collect();
     let mut shfileinfo: SHFILEINFOW = std::mem::zeroed();
 
@@ -113,10 +113,13 @@ pub unsafe fn get_hicon(file_path: &str) -> HICON {
     );
 
     if result == 0 {
-        panic!("Failed to get icon for file: {}", file_path);
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to get icon for file: {}", file_path),
+        )));
     }
 
-    shfileinfo.hIcon
+    Ok(shfileinfo.hIcon)
 }
 
 pub fn read_image_to_base64(file_path: &str) -> Result<String, Box<dyn Error>> {
